@@ -1,0 +1,21 @@
+version: 2
+
+sources:
+  - name: bronze
+    database: "{{ env_var('DATABRICKS_CATALOG', 'novamart') }}"
+    schema: bronze
+    description: >
+      Raw ingested tables from batch (Spark JDBC) and CDC (Debezium → Kafka →
+      Spark MERGE). Every table carries CDC metadata: _op, _deleted,
+      _event_ts_ms, _ingested_at, _source.
+    freshness:
+      warn_after: {count: 6, period: hour}
+      error_after: {count: 24, period: hour}
+    loaded_at_field: _ingested_at
+    tables:
+      - name: customers
+      - name: sellers
+      - name: products
+      - name: orders
+      - name: order_items
+      - name: payments

@@ -1,0 +1,43 @@
+name: Deploy
+
+on:
+  push:
+    tags: ["v*"]
+  workflow_dispatch:
+
+jobs:
+  deploy:
+    name: Bundle deploy + dbt build (prod)
+    runs-on: ubuntu-latest
+    environment: production
+    env:
+      DATABRICKS_HOST: ${{ secrets.DATABRICKS_HOST }}
+      DATABRICKS_TOKEN: ${{ secrets.DATABRICKS_TOKEN }}
+      DATABRICKS_HTTP_PATH: ${{ secrets.DATABRICKS_HTTP_PATH }}
+      DATABRICKS_CATALOG: novamart
+      DBT_PROFILES_DIR: ${{ github.workspace }}/transform
+    steps:
+      - uses: actions/checkout@v4
+
+      # ---- Deploy jobs/workflows via Databricks Asset Bundles
+      - uses: databricks/setup-cli@main
+      - name: Bundle validate
+        working-directory: platform/databricks
+        run: databricks bundle validate --target prod
+      - name: Bundle deploy
+        working-directory: platform/databricks
+        run: databricks bundle deploy --target prod
+
+      # ---- Promote dbt models
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+          cache: pip
+      - name: Install dbt
+        run: pip install dbt-databricks~=1.8
+      - name: dbt build (prod)
+        working-directory: transform
+        run: |
+          cp profiles.example.yml profiles.yml
+          dbt deps
+          dbt build --target dev   # 'dev' output points at the prod catalog/schema here

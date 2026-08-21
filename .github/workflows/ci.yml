@@ -1,0 +1,77 @@
+name: CI
+
+on:
+  pull_request:
+  push:
+    branches: [main]
+
+concurrency:
+  group: ci-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  lint-test:
+    name: Lint & unit tests
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+          cache: pip
+      - name: Install
+        run: pip install -e ".[dev,app]"
+      - name: Ruff
+        run: ruff check .
+      - name: Black
+        run: black --check .
+      - name: Pytest
+        run: pytest -q
+
+  dbt-validate:
+    name: dbt parse & sqlfluff
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: transform
+    env:
+      # dummy creds — `dbt parse` and sqlfluff templating do not connect
+      DATABRICKS_HOST: https://example.cloud.databricks.com
+      DATABRICKS_HTTP_PATH: /sql/1.0/warehouses/xxxx
+      DATABRICKS_TOKEN: dummy
+      DATABRICKS_CATALOG: novamart
+      DBT_PROFILES_DIR: ${{ github.workspace }}/transform
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+          cache: pip
+      - name: Install dbt + sqlfluff
+        run: pip install dbt-databricks~=1.8 sqlfluff sqlfluff-templater-dbt
+      - name: dbt deps
+        run: |
+          cp profiles.example.yml profiles.yml
+          dbt deps
+      - name: dbt parse
+        run: dbt parse
+      - name: sqlfluff lint
+        run: sqlfluff lint models --dialect databricks || true  # advisory in CI
+
+  terraform-fmt:
+    name: Terraform fmt & validate
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: platform/terraform
+    steps:
+      - uses: actions/checkout@v4
+      - uses: hashicorp/setup-terraform@v3
+        with:
+          terraform_version: "1.15.9"
+      - name: fmt check
+        run: terraform fmt -recursive -check -diff .
+      - name: init (no backend)
+        run: terraform init -backend=false
+      - name: validate
+        run: terraform validate

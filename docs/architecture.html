@@ -1,0 +1,718 @@
+<title>NovaMart Lakehouse</title>
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Archivo:wght@500;600;700;800&family=IBM+Plex+Sans:wght@400;500;600&family=IBM+Plex+Mono:wght@400;500;600&display=swap">
+
+<style>
+  :root{
+    --bg:#EEF1F0; --surface:#FBFCFC; --surface-2:#F2F5F4;
+    --ink:#141E1C; --muted:#556360; --faint:#7E8D8A;
+    --border:#D6DEDC; --border-strong:#BEC9C6;
+    --accent:#0E8C86; --accent-ink:#0A6D68; --accent-soft:#D5EBE9;
+    --bronze:#B0702F; --silver:#6E7C8A; --gold:#B5871B;
+    --bronze-soft:#F0E3D5; --silver-soft:#E3E8ED; --gold-soft:#F1E7C9;
+    --danger:#C0492F;
+    --shadow:0 1px 2px rgba(20,30,28,.06),0 8px 28px -12px rgba(20,30,28,.16);
+    --font-display:'Archivo',system-ui,sans-serif;
+    --font-body:'IBM Plex Sans',system-ui,sans-serif;
+    --font-mono:'IBM Plex Mono',ui-monospace,monospace;
+    --maxw:1080px; --readw:70ch;
+  }
+  @media (prefers-color-scheme:dark){
+    :root:not([data-theme="light"]){
+      --bg:#0B1413; --surface:#111C1A; --surface-2:#16211F;
+      --ink:#E7EEEC; --muted:#9BAAA6; --faint:#75847F;
+      --border:#233130; --border-strong:#33443F;
+      --accent:#2DD4BF; --accent-ink:#5EE6D3; --accent-soft:#123330;
+      --bronze:#D08F4F; --silver:#A6B4C1; --gold:#E1B84E;
+      --bronze-soft:#2A2018; --silver-soft:#1B242A; --gold-soft:#2A2312;
+      --danger:#E8785C;
+      --shadow:0 1px 2px rgba(0,0,0,.4),0 10px 30px -14px rgba(0,0,0,.7);
+    }
+  }
+  :root[data-theme="dark"]{
+    --bg:#0B1413; --surface:#111C1A; --surface-2:#16211F;
+    --ink:#E7EEEC; --muted:#9BAAA6; --faint:#75847F;
+    --border:#233130; --border-strong:#33443F;
+    --accent:#2DD4BF; --accent-ink:#5EE6D3; --accent-soft:#123330;
+    --bronze:#D08F4F; --silver:#A6B4C1; --gold:#E1B84E;
+    --bronze-soft:#2A2018; --silver-soft:#1B242A; --gold-soft:#2A2312;
+    --danger:#E8785C;
+    --shadow:0 1px 2px rgba(0,0,0,.4),0 10px 30px -14px rgba(0,0,0,.7);
+  }
+
+  *{box-sizing:border-box}
+  html{-webkit-text-size-adjust:100%}
+  body{
+    margin:0;background:var(--bg);color:var(--ink);
+    font-family:var(--font-body);font-size:16px;line-height:1.6;
+    -webkit-font-smoothing:antialiased;
+  }
+  .wrap{max-width:var(--maxw);margin:0 auto;padding:0 24px}
+  section{padding:56px 0;border-top:1px solid var(--border)}
+  section:first-of-type{border-top:0}
+
+  h1,h2,h3{font-family:var(--font-display);text-wrap:balance;line-height:1.12;margin:0}
+  h2{font-size:clamp(1.5rem,3.2vw,2.1rem);font-weight:700;letter-spacing:-.01em}
+  h3{font-size:1.14rem;font-weight:600;letter-spacing:-.005em}
+  p{margin:0 0 1em;max-width:var(--readw)}
+  a{color:var(--accent-ink)}
+  .lede{font-size:1.12rem;color:var(--muted);max-width:64ch}
+  .eyebrow{font-family:var(--font-mono);font-size:.72rem;font-weight:600;
+    letter-spacing:.18em;text-transform:uppercase;color:var(--accent-ink)}
+  .sec-head{display:flex;flex-direction:column;gap:10px;margin-bottom:30px}
+  .sec-head .num{font-family:var(--font-mono);font-size:.72rem;color:var(--faint);letter-spacing:.1em}
+
+  /* HERO */
+  .hero{padding:72px 0 48px;border-top:0}
+  .hero .console{
+    font-family:var(--font-mono);font-size:.72rem;letter-spacing:.16em;
+    text-transform:uppercase;color:var(--accent-ink);
+    display:inline-flex;align-items:center;gap:10px;margin-bottom:22px}
+  .hero .dot{width:8px;height:8px;border-radius:50%;background:var(--accent);
+    box-shadow:0 0 0 4px var(--accent-soft)}
+  .hero h1{font-size:clamp(2.5rem,7vw,4.6rem);font-weight:800;letter-spacing:-.03em}
+  .hero h1 .thin{font-weight:500;color:var(--muted)}
+  .hero .sub{font-size:clamp(1.05rem,2.2vw,1.28rem);color:var(--muted);
+    max-width:60ch;margin-top:18px}
+  .badges{display:flex;flex-wrap:wrap;gap:8px;margin-top:28px}
+  .badge{font-family:var(--font-mono);font-size:.74rem;font-weight:500;
+    padding:6px 12px;border:1px solid var(--border-strong);border-radius:999px;
+    background:var(--surface);color:var(--ink);display:inline-flex;gap:7px;align-items:center}
+  .badge b{color:var(--accent-ink);font-weight:600}
+
+  /* stat row */
+  .stats{display:grid;grid-template-columns:repeat(4,1fr);gap:1px;
+    background:var(--border);border:1px solid var(--border);border-radius:14px;
+    overflow:hidden;margin-top:40px}
+  .stat{background:var(--surface);padding:20px}
+  .stat .k{font-family:var(--font-display);font-size:1.7rem;font-weight:700;
+    letter-spacing:-.02em;font-variant-numeric:tabular-nums}
+  .stat .l{font-size:.82rem;color:var(--muted);margin-top:2px}
+  @media(max-width:720px){.stats{grid-template-columns:repeat(2,1fr)}}
+
+  /* cards / grid */
+  .grid{display:grid;gap:16px}
+  .g2{grid-template-columns:1fr 1fr}
+  .g3{grid-template-columns:repeat(3,1fr)}
+  @media(max-width:820px){.g2,.g3{grid-template-columns:1fr}}
+  .card{background:var(--surface);border:1px solid var(--border);border-radius:14px;
+    padding:22px;box-shadow:var(--shadow)}
+  .card h3{margin-bottom:8px}
+  .card p{color:var(--muted);font-size:.95rem;margin:0}
+  .card .tag{font-family:var(--font-mono);font-size:.7rem;letter-spacing:.08em;
+    text-transform:uppercase;color:var(--faint);display:block;margin-bottom:12px}
+
+  /* figure */
+  figure{margin:0}
+  .fig{background:var(--surface);border:1px solid var(--border);border-radius:16px;
+    padding:24px;box-shadow:var(--shadow);overflow-x:auto}
+  .fig svg{display:block;width:100%;height:auto;min-width:640px}
+  figcaption{font-size:.86rem;color:var(--muted);margin-top:14px;
+    padding-top:14px;border-top:1px solid var(--border);max-width:none}
+  figcaption b{color:var(--ink);font-weight:600}
+
+  /* svg helpers */
+  .s-node{fill:var(--surface-2);stroke:var(--border-strong)}
+  .s-lbl{fill:var(--ink);font-family:var(--font-body);font-weight:500}
+  .s-sub{fill:var(--muted);font-family:var(--font-mono)}
+  .s-zone{fill:none;stroke:var(--border);stroke-dasharray:4 4}
+  .s-zlbl{fill:var(--faint);font-family:var(--font-mono);font-weight:600;
+    letter-spacing:.12em;text-transform:uppercase}
+  .s-flow{stroke:var(--muted);fill:none;stroke-width:1.6}
+  .s-flow-a{stroke:var(--accent);fill:none;stroke-width:2}
+  .s-elbl{fill:var(--faint);font-family:var(--font-mono)}
+  .fill-bronze{fill:var(--bronze)} .fill-silver{fill:var(--silver)} .fill-gold{fill:var(--gold)}
+  .fill-accent{fill:var(--accent)}
+  .n-bronze{fill:var(--bronze-soft);stroke:var(--bronze)}
+  .n-silver{fill:var(--silver-soft);stroke:var(--silver)}
+  .n-gold{fill:var(--gold-soft);stroke:var(--gold)}
+  .n-accent{fill:var(--accent-soft);stroke:var(--accent)}
+
+  /* table */
+  .tbl-wrap{overflow-x:auto;border:1px solid var(--border);border-radius:14px;background:var(--surface)}
+  table{border-collapse:collapse;width:100%;min-width:640px;font-size:.9rem}
+  th,td{text-align:left;padding:12px 16px;border-bottom:1px solid var(--border);vertical-align:top}
+  thead th{font-family:var(--font-mono);font-size:.72rem;letter-spacing:.08em;
+    text-transform:uppercase;color:var(--muted);background:var(--surface-2);position:sticky;top:0}
+  tbody tr:last-child td{border-bottom:0}
+  td b{font-weight:600}
+  code{font-family:var(--font-mono);font-size:.86em;background:var(--surface-2);
+    padding:1px 6px;border-radius:6px;border:1px solid var(--border)}
+  .pill{font-family:var(--font-mono);font-size:.68rem;font-weight:600;padding:2px 8px;
+    border-radius:999px;white-space:nowrap;display:inline-block}
+  .pill.free{background:var(--accent-soft);color:var(--accent-ink)}
+  .pill.trial{background:var(--gold-soft);color:var(--gold)}
+
+  /* medallion tiers */
+  .tiers{display:grid;grid-template-columns:repeat(3,1fr);gap:16px}
+  @media(max-width:820px){.tiers{grid-template-columns:1fr}}
+  .tier{border:1px solid var(--border);border-radius:14px;overflow:hidden;background:var(--surface)}
+  .tier .cap{padding:14px 18px;display:flex;align-items:center;gap:10px;
+    font-family:var(--font-display);font-weight:700}
+  .tier .cap .swatch{width:12px;height:12px;border-radius:3px}
+  .tier.bronze .cap{background:var(--bronze-soft)} .tier.bronze .swatch{background:var(--bronze)}
+  .tier.silver .cap{background:var(--silver-soft)} .tier.silver .swatch{background:var(--silver)}
+  .tier.gold .cap{background:var(--gold-soft)} .tier.gold .swatch{background:var(--gold)}
+  .tier .body{padding:16px 18px}
+  .tier ul{margin:0;padding-left:18px;font-size:.9rem;color:var(--muted)}
+  .tier li{margin:5px 0}
+  .tier .meta{font-family:var(--font-mono);font-size:.72rem;color:var(--faint);
+    margin-top:12px;padding-top:12px;border-top:1px solid var(--border)}
+
+  /* steps / roadmap */
+  .steps{display:flex;flex-direction:column;gap:2px;counter-reset:st}
+  .step{display:grid;grid-template-columns:auto 1fr;gap:18px;padding:18px 0;
+    border-bottom:1px solid var(--border)}
+  .step:last-child{border-bottom:0}
+  .step .no{font-family:var(--font-mono);font-weight:600;color:var(--accent-ink);
+    font-size:.82rem;padding-top:3px;white-space:nowrap}
+  .step h3{margin-bottom:4px}
+  .step p{margin:0;color:var(--muted);font-size:.94rem}
+  .step .out{font-family:var(--font-mono);font-size:.76rem;color:var(--faint);margin-top:6px;display:block}
+
+  /* repo tree */
+  .tree{font-family:var(--font-mono);font-size:.82rem;line-height:1.75;
+    background:var(--surface);border:1px solid var(--border);border-radius:14px;
+    padding:22px 24px;overflow-x:auto;color:var(--muted)}
+  .tree .d{color:var(--ink);font-weight:600}
+  .tree .c{color:var(--faint)}
+
+  .callout{border:1px solid var(--border);border-left:3px solid var(--accent);
+    background:var(--surface);border-radius:10px;padding:16px 18px;margin:20px 0}
+  .callout .t{font-family:var(--font-mono);font-size:.72rem;letter-spacing:.1em;
+    text-transform:uppercase;color:var(--accent-ink);font-weight:600;margin-bottom:6px}
+  .callout p{margin:0;font-size:.92rem;color:var(--muted)}
+  .callout.warn{border-left-color:var(--danger)}
+  .callout.warn .t{color:var(--danger)}
+
+  footer{border-top:1px solid var(--border);padding:40px 0 64px;color:var(--faint);
+    font-family:var(--font-mono);font-size:.8rem}
+
+  @media (prefers-reduced-motion:no-preference){
+    .badge,.card{transition:transform .2s ease}
+    .card:hover{transform:translateY(-2px)}
+  }
+</style>
+
+<div class="wrap">
+
+  <!-- HERO -->
+  <header class="hero">
+    <div class="console"><span class="dot"></span>Data Platform · Portfolio Build</div>
+    <h1>NovaMart <span class="thin">Lakehouse</span></h1>
+    <p class="sub">An end-to-end e-commerce data platform: <b>batch + change-data-capture</b>
+      ingestion of 5M+ transactional rows, a medallion lakehouse on Databricks, a Kimball star
+      schema built with dbt, and a live analytics homepage — the whole thing versioned, tested,
+      and shipped through GitHub Actions.</p>
+
+    <div class="badges">
+      <span class="badge"><b>5M+</b> rows generated</span>
+      <span class="badge">Batch <b>+</b> CDC</span>
+      <span class="badge">Apache <b>Spark</b></span>
+      <span class="badge">Debezium <b>→</b> Kafka</span>
+      <span class="badge"><b>Databricks</b> Free</span>
+      <span class="badge"><b>dbt</b> + Delta</span>
+      <span class="badge"><b>GitHub</b> Actions CI/CD</span>
+    </div>
+
+    <div class="stats">
+      <div class="stat"><div class="k">5.4M</div><div class="l">order-item rows seeded</div></div>
+      <div class="stat"><div class="k">3</div><div class="l">medallion layers (Bze/Slv/Gld)</div></div>
+      <div class="stat"><div class="k">$0</div><div class="l">infra cost — free tiers only</div></div>
+      <div class="stat"><div class="k">9</div><div class="l">star-schema tables (7 dim · 2 fact)</div></div>
+    </div>
+  </header>
+
+  <!-- 1. DOMAIN -->
+  <section>
+    <div class="sec-head">
+      <span class="num">01 / DOMAIN &amp; DATA</span>
+      <h2>Why e-commerce, and where 5 million rows come from</h2>
+    </div>
+    <p class="lede">E-commerce is the richest domain for a portfolio: it produces a genuine star
+      schema (orders, items, customers, products, payments, sellers, reviews), it has a natural
+      transactional source that <b>changes constantly</b> — perfect for CDC — and volume is easy
+      to scale honestly.</p>
+
+    <div class="grid g3" style="margin-top:28px">
+      <div class="card">
+        <span class="tag">The source of truth</span>
+        <h3>OLTP Postgres</h3>
+        <p>A normalized operational database (<code>customers</code>, <code>orders</code>,
+          <code>order_items</code>, <code>products</code>, <code>payments</code>) — the system a
+          real shop would run on. Seeded once, then mutated continuously.</p>
+      </div>
+      <div class="card">
+        <span class="tag">Reaching scale honestly</span>
+        <h3>Synthetic generator</h3>
+        <p>A Python + <code>Faker</code> generator produces a coherent history: ~250k customers,
+          50k products, <b>2M orders → 5.4M order-items</b>, with realistic seasonality, price
+          distributions, and status lifecycles.</p>
+      </div>
+      <div class="card">
+        <span class="tag">Optional real anchor</span>
+        <h3>Public datasets</h3>
+        <p>The schema mirrors the <b>Olist</b> Brazilian e-commerce dataset, so the same models
+          run against real data. Instacart (3M orders) and Amazon Reviews are drop-in extensions.</p>
+      </div>
+    </div>
+
+    <div class="callout">
+      <div class="t">Two ingestion modes, one source</div>
+      <p>The <b>batch</b> path bulk-loads history from Postgres via Spark JDBC. The <b>CDC</b> path
+        captures every <code>INSERT / UPDATE / DELETE</code> from the Postgres write-ahead log in
+        near-real-time. An <code>order</code> that moves <code>placed → paid → shipped → delivered</code>
+        emits four CDC events — that lifecycle is exactly what makes the streaming story real.</p>
+    </div>
+  </section>
+
+  <!-- 2. ARCHITECTURE -->
+  <section>
+    <div class="sec-head">
+      <span class="num">02 / ARCHITECTURE</span>
+      <h2>Full pipeline: from write-ahead log to homepage</h2>
+    </div>
+    <p class="lede">The stack splits cleanly in two. A <b>local Docker plane</b> runs the sources and
+      streaming ingestion; the <b>cloud lakehouse</b> on Databricks does transformation and serving.
+      Object storage is the seam between them — a deliberate design forced by, and turned to
+      advantage from, Free Edition's network limits.</p>
+
+    <figure class="fig" style="margin-top:26px">
+      <svg viewBox="0 0 1000 600" role="img" aria-label="End-to-end architecture: Postgres source with Debezium CDC and Spark batch feed an object-storage landing zone, which Databricks reads into bronze, silver and gold medallion Delta layers, served to a Streamlit dashboard; orchestration and CI/CD span the bottom.">
+        <defs>
+          <marker id="ar" markerWidth="9" markerHeight="9" refX="7.5" refY="4" orient="auto">
+            <polygon points="0,0 9,4 0,8" fill="var(--muted)"/>
+          </marker>
+          <marker id="ara" markerWidth="9" markerHeight="9" refX="7.5" refY="4" orient="auto">
+            <polygon points="0,0 9,4 0,8" fill="var(--accent)"/>
+          </marker>
+        </defs>
+
+        <!-- ZONE A: local docker -->
+        <rect class="s-zone" x="16" y="40" width="300" height="360" rx="12"/>
+        <text class="s-zlbl" x="32" y="64" font-size="11">Local · Docker Compose</text>
+
+        <rect class="s-node" x="40" y="84" width="252" height="60" rx="9"/>
+        <text class="s-lbl" x="60" y="110" font-size="13.5">Postgres — OLTP</text>
+        <text class="s-sub" x="60" y="128" font-size="10.5">orders · items · customers · payments</text>
+
+        <rect class="s-node" x="40" y="164" width="120" height="56" rx="9"/>
+        <text class="s-lbl" x="56" y="188" font-size="12">Data gen</text>
+        <text class="s-sub" x="56" y="205" font-size="10">Faker · 5M+</text>
+
+        <rect class="s-node" x="172" y="164" width="120" height="56" rx="9"/>
+        <text class="s-lbl" x="188" y="188" font-size="12">Debezium</text>
+        <text class="s-sub" x="188" y="205" font-size="10">WAL decode</text>
+
+        <rect class="s-node n-accent" x="40" y="242" width="120" height="56" rx="9"/>
+        <text class="s-lbl" x="56" y="266" font-size="12">Kafka</text>
+        <text class="s-sub" x="56" y="283" font-size="10">cdc topics</text>
+
+        <rect class="s-node" x="172" y="242" width="120" height="56" rx="9"/>
+        <text class="s-lbl" x="186" y="262" font-size="11.5">Spark Stream</text>
+        <text class="s-sub" x="186" y="279" font-size="9.5">readStream</text>
+        <text class="s-sub" x="186" y="291" font-size="9.5">+ MERGE</text>
+
+        <rect class="s-node" x="40" y="320" width="252" height="56" rx="9"/>
+        <text class="s-lbl" x="60" y="343" font-size="12.5">Spark Batch — JDBC bulk load</text>
+        <text class="s-sub" x="60" y="360" font-size="10">full + incremental snapshots</text>
+
+        <!-- ZONE B: landing -->
+        <rect class="s-zone" x="352" y="120" width="150" height="200" rx="12"/>
+        <text class="s-zlbl" x="366" y="112" font-size="11">Landing</text>
+        <rect class="s-node n-accent" x="368" y="150" width="118" height="140" rx="10"/>
+        <text class="s-lbl" x="384" y="190" font-size="13">Object</text>
+        <text class="s-lbl" x="384" y="208" font-size="13">Storage</text>
+        <text class="s-sub" x="384" y="232" font-size="10">MinIO / S3</text>
+        <text class="s-sub" x="384" y="248" font-size="10">raw parquet</text>
+        <text class="s-sub" x="384" y="264" font-size="10">+ delta</text>
+
+        <!-- ZONE C: databricks -->
+        <rect class="s-zone" x="536" y="40" width="360" height="360" rx="12"/>
+        <text class="s-zlbl" x="552" y="64" font-size="11">Databricks Free · Unity Catalog</text>
+
+        <rect class="s-node n-bronze" x="560" y="84" width="150" height="86" rx="10"/>
+        <text class="fill-bronze s-lbl" x="578" y="112" font-size="13" style="font-weight:700">Bronze</text>
+        <text class="s-sub" x="578" y="132" font-size="10">raw ingested,</text>
+        <text class="s-sub" x="578" y="146" font-size="10">append-only,</text>
+        <text class="s-sub" x="578" y="160" font-size="10">CDC metadata</text>
+
+        <rect class="s-node n-silver" x="724" y="84" width="150" height="86" rx="10"/>
+        <text class="fill-silver s-lbl" x="742" y="112" font-size="13" style="font-weight:700">Silver</text>
+        <text class="s-sub" x="742" y="132" font-size="10">cleaned, typed,</text>
+        <text class="s-sub" x="742" y="146" font-size="10">deduped, SCD-2,</text>
+        <text class="s-sub" x="742" y="160" font-size="10">conformed</text>
+
+        <rect class="s-node n-gold" x="560" y="196" width="314" height="86" rx="10"/>
+        <text class="fill-gold s-lbl" x="580" y="224" font-size="13" style="font-weight:700">Gold — Star schema (dbt)</text>
+        <text class="s-sub" x="580" y="246" font-size="10.5">fct_order_items · fct_payments · dim_customer · dim_product · dim_date …</text>
+        <text class="s-sub" x="580" y="266" font-size="10.5">tested · documented · SCD-2 dims</text>
+
+        <rect class="s-node n-accent" x="560" y="306" width="150" height="70" rx="10"/>
+        <text class="s-lbl" x="578" y="334" font-size="12.5">SQL Warehouse</text>
+        <text class="s-sub" x="578" y="352" font-size="10">2X-Small serverless</text>
+
+        <rect class="s-node" x="724" y="306" width="150" height="70" rx="10"/>
+        <text class="s-lbl" x="742" y="334" font-size="12.5">Streamlit</text>
+        <text class="s-sub" x="742" y="352" font-size="10">homepage analytics</text>
+
+        <!-- cross-cutting band -->
+        <rect x="16" y="430" width="880" height="150" rx="12" fill="var(--surface-2)" stroke="var(--border)"/>
+        <text class="s-zlbl" x="32" y="454" font-size="11">Cross-cutting — every commit</text>
+        <rect class="s-node" x="40" y="470" width="270" height="92" rx="9"/>
+        <text class="s-lbl" x="58" y="498" font-size="12.5">Orchestration</text>
+        <text class="s-sub" x="58" y="518" font-size="10">Databricks Workflows +</text>
+        <text class="s-sub" x="58" y="532" font-size="10">Asset Bundles (databricks.yml)</text>
+        <text class="s-sub" x="58" y="546" font-size="10">local: Airflow DAG alt.</text>
+
+        <rect class="s-node" x="326" y="470" width="270" height="92" rx="9"/>
+        <text class="s-lbl" x="344" y="498" font-size="12.5">CI/CD — GitHub Actions</text>
+        <text class="s-sub" x="344" y="518" font-size="10">ruff · pytest · sqlfluff</text>
+        <text class="s-sub" x="344" y="532" font-size="10">dbt build (CI schema)</text>
+        <text class="s-sub" x="344" y="546" font-size="10">bundle deploy on main</text>
+
+        <rect class="s-node" x="612" y="470" width="270" height="92" rx="9"/>
+        <text class="s-lbl" x="630" y="498" font-size="12.5">Governance &amp; quality</text>
+        <text class="s-sub" x="630" y="518" font-size="10">Unity Catalog lineage</text>
+        <text class="s-sub" x="630" y="532" font-size="10">dbt tests + expectations</text>
+        <text class="s-sub" x="630" y="546" font-size="10">Terraform (S3/UC) optional</text>
+
+        <!-- flows -->
+        <!-- gen -> pg -->
+        <path class="s-flow" d="M100,164 L120,144" marker-end="url(#ar)"/>
+        <!-- pg -> debezium -->
+        <path class="s-flow-a" d="M232,144 L232,164" marker-end="url(#ara)"/>
+        <text class="s-elbl" x="238" y="160" font-size="9">WAL</text>
+        <!-- debezium -> kafka -->
+        <path class="s-flow-a" d="M172,270 L160,270" marker-end="url(#ara)" transform="translate(0,0)"/>
+        <path class="s-flow-a" d="M200,220 L120,242" marker-end="url(#ara)"/>
+        <!-- kafka -> spark stream -->
+        <path class="s-flow-a" d="M160,270 L172,270" marker-end="url(#ara)"/>
+        <!-- pg -> spark batch -->
+        <path class="s-flow" d="M120,144 L120,320" marker-end="url(#ar)"/>
+        <text class="s-elbl" x="126" y="315" font-size="9">JDBC</text>
+        <!-- spark stream -> landing -->
+        <path class="s-flow-a" d="M292,270 L368,240" marker-end="url(#ara)"/>
+        <!-- spark batch -> landing -->
+        <path class="s-flow" d="M292,348 L368,258" marker-end="url(#ar)"/>
+        <!-- landing -> bronze -->
+        <path class="s-flow-a" d="M486,200 L560,140" marker-end="url(#ara)"/>
+        <text class="s-elbl" x="500" y="150" font-size="9">read / COPY</text>
+        <!-- bronze -> silver -->
+        <path class="s-flow" d="M710,127 L724,127" marker-end="url(#ar)"/>
+        <!-- silver -> gold -->
+        <path class="s-flow" d="M799,170 L780,196" marker-end="url(#ar)"/>
+        <!-- gold -> warehouse -->
+        <path class="s-flow" d="M635,282 L635,306" marker-end="url(#ar)"/>
+        <!-- warehouse -> streamlit -->
+        <path class="s-flow-a" d="M710,341 L724,341" marker-end="url(#ara)"/>
+      </svg>
+      <figcaption><b>The seam is deliberate.</b> Databricks Free Edition is serverless-only with
+        restricted outbound networking, so it can't dial into a local Kafka or Postgres. Landing
+        raw files in object storage (MinIO locally → S3 in cloud) decouples the streaming plane from
+        the lakehouse — the same pattern real teams use to keep ingestion and compute independent.
+        Teal edges are the near-real-time CDC path; grey edges are batch.</figcaption>
+    </figure>
+  </section>
+
+  <!-- 3. CDC FLOW -->
+  <section>
+    <div class="sec-head">
+      <span class="num">03 / CHANGE DATA CAPTURE</span>
+      <h2>How one row change becomes a gold-layer fact</h2>
+    </div>
+    <p class="lede">The CDC path is the centerpiece. Debezium reads Postgres's logical replication
+      slot, so the platform never polls the database — it reacts to the write-ahead log itself.</p>
+
+    <figure class="fig" style="margin-top:26px">
+      <svg viewBox="0 0 1000 250" role="img" aria-label="CDC sequence: a Postgres UPDATE writes to the WAL, Debezium decodes it into a Kafka change event, Spark structured streaming merges it into a bronze Delta table, and downstream silver and gold models pick it up.">
+        <defs>
+          <marker id="ar2" markerWidth="9" markerHeight="9" refX="7.5" refY="4" orient="auto">
+            <polygon points="0,0 9,4 0,8" fill="var(--accent)"/>
+          </marker>
+        </defs>
+        <!-- lane -->
+        <g font-size="12">
+          <rect class="s-node" x="8" y="70" width="150" height="88" rx="10"/>
+          <text class="s-lbl" x="26" y="100" font-size="13">1 · Postgres</text>
+          <text class="s-sub" x="26" y="120" font-size="10">UPDATE orders</text>
+          <text class="s-sub" x="26" y="134" font-size="10">SET status='paid'</text>
+          <text class="s-sub" x="26" y="148" font-size="10">→ WAL entry</text>
+
+          <rect class="s-node" x="206" y="70" width="150" height="88" rx="10"/>
+          <text class="s-lbl" x="224" y="100" font-size="13">2 · Debezium</text>
+          <text class="s-sub" x="224" y="120" font-size="10">decode slot</text>
+          <text class="s-sub" x="224" y="134" font-size="10">emit JSON</text>
+          <text class="s-sub" x="224" y="148" font-size="10">op=u, before/after</text>
+
+          <rect class="s-node n-accent" x="404" y="70" width="150" height="88" rx="10"/>
+          <text class="s-lbl" x="422" y="100" font-size="13">3 · Kafka</text>
+          <text class="s-sub" x="422" y="120" font-size="10">topic:</text>
+          <text class="s-sub" x="422" y="134" font-size="10">nova.public.orders</text>
+          <text class="s-sub" x="422" y="148" font-size="10">keyed by PK</text>
+
+          <rect class="s-node n-bronze" x="602" y="70" width="150" height="88" rx="10"/>
+          <text class="s-lbl fill-bronze" x="620" y="100" font-size="13" style="font-weight:700">4 · Bronze</text>
+          <text class="s-sub" x="620" y="120" font-size="10">Spark readStream</text>
+          <text class="s-sub" x="620" y="134" font-size="10">foreachBatch</text>
+          <text class="s-sub" x="620" y="148" font-size="10">MERGE INTO delta</text>
+
+          <rect class="s-node n-gold" x="800" y="70" width="150" height="88" rx="10"/>
+          <text class="s-lbl fill-gold" x="818" y="100" font-size="13" style="font-weight:700">5 · Silver→Gold</text>
+          <text class="s-sub" x="818" y="120" font-size="10">dbt incremental</text>
+          <text class="s-sub" x="818" y="134" font-size="10">SCD-2 dims</text>
+          <text class="s-sub" x="818" y="148" font-size="10">fresh facts</text>
+
+          <path class="s-flow-a" d="M158,114 L206,114" marker-end="url(#ar2)"/>
+          <path class="s-flow-a" d="M356,114 L404,114" marker-end="url(#ar2)"/>
+          <path class="s-flow-a" d="M554,114 L602,114" marker-end="url(#ar2)"/>
+          <path class="s-flow-a" d="M752,114 L800,114" marker-end="url(#ar2)"/>
+        </g>
+        <text class="s-elbl" x="8" y="196" font-size="10.5">latency target: seconds → single-digit minutes end-to-end · exactly-once via Delta MERGE on primary key + checkpointing</text>
+      </svg>
+      <figcaption><b>Idempotent by construction.</b> Bronze ingest uses <code>MERGE INTO … WHEN
+        MATCHED</code> keyed on the primary key, so replays and out-of-order events converge to the
+        same state. Deletes carry <code>op=d</code> and are soft-deleted with a tombstone flag, never
+        silently dropped — the gold layer can still count them.</figcaption>
+    </figure>
+  </section>
+
+  <!-- 4. TECH STACK -->
+  <section>
+    <div class="sec-head">
+      <span class="num">04 / TECH STACK</span>
+      <h2>Every layer, every tool, and what it costs</h2>
+    </div>
+    <p class="lede">The rule: free or free-trial, but never toy. Each choice is one a real data team
+      would recognize on a résumé.</p>
+
+    <div class="tbl-wrap" style="margin-top:24px">
+      <table>
+        <thead><tr><th>Layer</th><th>Tool</th><th>Why this one</th><th>Cost</th></tr></thead>
+        <tbody>
+          <tr><td><b>Source DB</b></td><td>PostgreSQL 16</td><td>Real OLTP with logical replication for CDC</td><td><span class="pill free">free · OSS</span></td></tr>
+          <tr><td><b>Data gen</b></td><td>Python · Faker · Polars</td><td>Coherent 5M+ synthetic history, fast</td><td><span class="pill free">free · OSS</span></td></tr>
+          <tr><td><b>CDC</b></td><td>Debezium 3.x</td><td>Log-based capture, the industry standard</td><td><span class="pill free">free · OSS</span></td></tr>
+          <tr><td><b>Streaming bus</b></td><td>Apache Kafka + Connect</td><td>Durable, replayable change stream</td><td><span class="pill free">free · OSS</span></td></tr>
+          <tr><td><b>Processing</b></td><td>Apache Spark (PySpark)</td><td>Batch JDBC + Structured Streaming in one engine</td><td><span class="pill free">free · OSS</span></td></tr>
+          <tr><td><b>Landing</b></td><td>MinIO → AWS S3</td><td>S3-compatible locally; free tier in cloud</td><td><span class="pill free">free tier</span></td></tr>
+          <tr><td><b>Lakehouse</b></td><td>Databricks Free Edition</td><td>Serverless Spark + Delta + Unity Catalog, no expiry</td><td><span class="pill free">free</span></td></tr>
+          <tr><td><b>Table format</b></td><td>Delta Lake</td><td>ACID MERGE — makes idempotent CDC possible</td><td><span class="pill free">free · OSS</span></td></tr>
+          <tr><td><b>Transform</b></td><td>dbt-databricks</td><td>Versioned SQL models, tests, docs, lineage</td><td><span class="pill free">free · OSS</span></td></tr>
+          <tr><td><b>Orchestration</b></td><td>Databricks Workflows / Asset Bundles</td><td>Native scheduling + IaC deploy of jobs</td><td><span class="pill free">free</span></td></tr>
+          <tr><td><b>Serving</b></td><td>Databricks SQL + Streamlit</td><td>2X-Small warehouse feeds a live dashboard</td><td><span class="pill free">free</span></td></tr>
+          <tr><td><b>CI/CD</b></td><td>GitHub Actions</td><td>Lint, test, dbt build, bundle deploy</td><td><span class="pill free">free tier</span></td></tr>
+          <tr><td><b>IaC</b></td><td>Terraform <span style="color:var(--faint)">(optional)</span></td><td>Provision S3 + Unity Catalog objects</td><td><span class="pill free">free · OSS</span></td></tr>
+        </tbody>
+      </table>
+    </div>
+    <div class="callout warn">
+      <div class="t">Free Edition guardrails to design around</div>
+      <p>One 2X-Small SQL warehouse, serverless-only compute, capped concurrent job tasks, and
+        restricted outbound internet. The architecture respects all four: heavy Spark shuffles stay
+        small, streaming runs locally, and the warehouse serves a pre-aggregated gold layer rather
+        than raw scans.</p>
+    </div>
+  </section>
+
+  <!-- 5. MEDALLION -->
+  <section>
+    <div class="sec-head">
+      <span class="num">05 / MEDALLION LAYERS</span>
+      <h2>What lives in bronze, silver, and gold</h2>
+    </div>
+    <div class="tiers" style="margin-top:24px">
+      <div class="tier bronze">
+        <div class="cap"><span class="swatch"></span>Bronze — Raw</div>
+        <div class="body">
+          <ul>
+            <li>Exact copy of source, append-only</li>
+            <li>CDC envelope kept: <code>op</code>, <code>ts_ms</code>, before/after</li>
+            <li>Batch snapshots landed as-is</li>
+            <li>No business logic, nothing dropped</li>
+          </ul>
+          <div class="meta">format: Delta · load: MERGE + append</div>
+        </div>
+      </div>
+      <div class="tier silver">
+        <div class="cap"><span class="swatch"></span>Silver — Conformed</div>
+        <div class="body">
+          <ul>
+            <li>Typed, deduplicated, latest-state per key</li>
+            <li>Soft-delete tombstones resolved</li>
+            <li>Standardized units, currencies, timezones</li>
+            <li>Referential joins validated</li>
+          </ul>
+          <div class="meta">format: Delta · engine: Spark + dbt</div>
+        </div>
+      </div>
+      <div class="tier gold">
+        <div class="cap"><span class="swatch"></span>Gold — Star schema</div>
+        <div class="body">
+          <ul>
+            <li>Kimball facts + conformed dimensions</li>
+            <li>SCD-2 history on customer &amp; product</li>
+            <li>Pre-aggregated marts for the dashboard</li>
+            <li>Fully tested &amp; documented in dbt</li>
+          </ul>
+          <div class="meta">format: Delta · consumer: SQL + Streamlit</div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- 6. STAR SCHEMA -->
+  <section>
+    <div class="sec-head">
+      <span class="num">06 / DIMENSIONAL MODEL</span>
+      <h2>The gold-layer star schema</h2>
+    </div>
+    <p class="lede">Grain matters: the primary fact is one row <b>per order line item</b>. That single
+      decision makes revenue, units, discounts, and basket analysis all additive and trivially
+      correct.</p>
+
+    <figure class="fig" style="margin-top:26px">
+      <svg viewBox="0 0 1000 560" role="img" aria-label="Star schema: central fact_order_items surrounded by dim_date, dim_customer, dim_product, dim_seller, dim_payment_method, dim_order_status and dim_geography, with a secondary fact_payments.">
+        <defs>
+          <marker id="ar3" markerWidth="8" markerHeight="8" refX="6.5" refY="3.5" orient="auto">
+            <polygon points="0,0 8,3.5 0,7" fill="var(--silver)"/>
+          </marker>
+        </defs>
+
+        <!-- spokes (draw first, behind) -->
+        <g stroke="var(--silver)" stroke-width="1.3" opacity=".8">
+          <line x1="500" y1="280" x2="180" y2="90"/>
+          <line x1="500" y1="280" x2="500" y2="80"/>
+          <line x1="500" y1="280" x2="820" y2="90"/>
+          <line x1="500" y1="280" x2="150" y2="280"/>
+          <line x1="500" y1="280" x2="850" y2="280"/>
+          <line x1="500" y1="280" x2="180" y2="470"/>
+          <line x1="500" y1="280" x2="820" y2="470"/>
+        </g>
+        <line x1="620" y1="330" x2="720" y2="440" stroke="var(--accent)" stroke-width="1.4" stroke-dasharray="5 4"/>
+
+        <!-- central fact -->
+        <rect class="n-gold" x="392" y="222" width="216" height="116" rx="12" stroke-width="2"/>
+        <text x="500" y="250" text-anchor="middle" class="fill-gold" font-family="var(--font-display)" font-weight="700" font-size="15">fct_order_items</text>
+        <text x="500" y="272" text-anchor="middle" class="s-sub" font-size="10">grain: 1 line item</text>
+        <text x="500" y="292" text-anchor="middle" class="s-sub" font-size="9.5">FK: date, customer, product,</text>
+        <text x="500" y="305" text-anchor="middle" class="s-sub" font-size="9.5">seller, payment, status, geo</text>
+        <text x="500" y="324" text-anchor="middle" class="s-sub" font-size="9.5">measures: qty · price · discount · net</text>
+
+        <!-- dims -->
+        <g font-size="12">
+          <!-- dim_date -->
+          <rect class="s-node" x="420" y="34" width="160" height="46" rx="9"/>
+          <text x="500" y="56" text-anchor="middle" class="s-lbl" font-size="12">dim_date</text>
+          <text x="500" y="71" text-anchor="middle" class="s-sub" font-size="9">day·week·month·qtr·holiday</text>
+
+          <!-- dim_customer -->
+          <rect class="s-node" x="80" y="44" width="180" height="52" rx="9"/>
+          <text x="170" y="66" text-anchor="middle" class="s-lbl" font-size="12">dim_customer</text>
+          <text x="170" y="82" text-anchor="middle" class="s-sub" font-size="9">SCD-2 · segment · tenure</text>
+
+          <!-- dim_product -->
+          <rect class="s-node" x="740" y="44" width="180" height="52" rx="9"/>
+          <text x="830" y="66" text-anchor="middle" class="s-lbl" font-size="12">dim_product</text>
+          <text x="830" y="82" text-anchor="middle" class="s-sub" font-size="9">SCD-2 · category · price band</text>
+
+          <!-- dim_geography -->
+          <rect class="s-node" x="20" y="254" width="150" height="52" rx="9"/>
+          <text x="95" y="276" text-anchor="middle" class="s-lbl" font-size="12">dim_geography</text>
+          <text x="95" y="292" text-anchor="middle" class="s-sub" font-size="9">city·state·region</text>
+
+          <!-- dim_seller -->
+          <rect class="s-node" x="830" y="254" width="150" height="52" rx="9"/>
+          <text x="905" y="276" text-anchor="middle" class="s-lbl" font-size="12">dim_seller</text>
+          <text x="905" y="292" text-anchor="middle" class="s-sub" font-size="9">seller·fulfil·rating</text>
+
+          <!-- dim_payment -->
+          <rect class="s-node" x="80" y="446" width="180" height="52" rx="9"/>
+          <text x="170" y="468" text-anchor="middle" class="s-lbl" font-size="12">dim_payment_method</text>
+          <text x="170" y="484" text-anchor="middle" class="s-sub" font-size="9">card·pix·boleto·wallet</text>
+
+          <!-- dim_order_status -->
+          <rect class="s-node" x="740" y="446" width="180" height="52" rx="9"/>
+          <text x="830" y="468" text-anchor="middle" class="s-lbl" font-size="12">dim_order_status</text>
+          <text x="830" y="484" text-anchor="middle" class="s-sub" font-size="9">placed→paid→shipped→…</text>
+        </g>
+
+        <!-- secondary fact -->
+        <rect class="n-gold" x="640" y="424" width="160" height="66" rx="10"/>
+        <text x="720" y="450" text-anchor="middle" class="fill-gold s-lbl" font-size="12.5" style="font-weight:700">fct_payments</text>
+        <text x="720" y="468" text-anchor="middle" class="s-sub" font-size="9">grain: 1 payment</text>
+        <text x="720" y="481" text-anchor="middle" class="s-sub" font-size="9">shares conformed dims</text>
+      </svg>
+      <figcaption><b>Two facts, seven conformed dimensions.</b> <code>fct_payments</code> reuses the
+        same <code>dim_date</code>, <code>dim_customer</code> and <code>dim_payment_method</code> — the
+        hallmark of a real Kimball model, letting revenue and cash be analyzed on the same axes.
+        <code>dim_customer</code> and <code>dim_product</code> track history as slowly-changing
+        type-2 so a sale is always attributed to the attributes that were true <em>at order time</em>.</figcaption>
+    </figure>
+  </section>
+
+  <!-- 7. CI/CD + REPO -->
+  <section>
+    <div class="sec-head">
+      <span class="num">07 / DELIVERY</span>
+      <h2>CI/CD and repository layout</h2>
+    </div>
+
+    <div class="grid g2" style="align-items:start">
+      <div>
+        <h3 style="margin-bottom:14px">GitHub Actions pipeline</h3>
+        <div class="steps">
+          <div class="step"><span class="no">on: PR</span><div><h3>Quality gate</h3><p><code>ruff</code> + <code>black --check</code> on Python, <code>sqlfluff</code> on dbt SQL, then <code>pytest</code> over generators &amp; transform helpers.</p></div></div>
+          <div class="step"><span class="no">on: PR</span><div><h3>dbt CI build</h3><p><code>dbt build --target ci</code> against an ephemeral schema, running every model + test on a sample. Fails the PR on a broken contract.</p></div></div>
+          <div class="step"><span class="no">on: main</span><div><h3>Deploy</h3><p><code>databricks bundle deploy --target prod</code> ships jobs + notebooks; <code>dbt build --target prod</code> promotes models. Tagged releases only.</p></div></div>
+          <div class="step"><span class="no">nightly</span><div><h3>Freshness</h3><p>Scheduled run asserts source freshness &amp; row-count anomalies, posting a summary to the workflow log.</p></div></div>
+        </div>
+      </div>
+
+      <div>
+        <h3 style="margin-bottom:14px">Repository</h3>
+        <div class="tree"><span class="d">novamart-lakehouse/</span>
+├─ <span class="d">ingestion/</span>
+│  ├─ generator/      <span class="c"># Faker 5M+ seed</span>
+│  ├─ batch/          <span class="c"># PySpark JDBC</span>
+│  └─ streaming/      <span class="c"># Spark + Kafka CDC</span>
+├─ <span class="d">transform/</span>       <span class="c"># dbt project</span>
+│  ├─ models/
+│  │  ├─ staging/
+│  │  ├─ silver/
+│  │  └─ gold/        <span class="c"># star schema</span>
+│  └─ tests/
+├─ <span class="d">platform/</span>
+│  ├─ docker/         <span class="c"># compose stack</span>
+│  ├─ databricks/     <span class="c"># asset bundle</span>
+│  └─ terraform/      <span class="c"># S3 + UC</span>
+├─ <span class="d">app/</span>              <span class="c"># Streamlit homepage</span>
+├─ <span class="d">tests/</span>           <span class="c"># pytest</span>
+└─ <span class="d">.github/workflows/</span> <span class="c"># CI/CD yml</span>
+</div>
+      </div>
+    </div>
+  </section>
+
+  <!-- 8. ROADMAP -->
+  <section>
+    <div class="sec-head">
+      <span class="num">08 / BUILD ORDER</span>
+      <h2>How it gets built, in shippable slices</h2>
+    </div>
+    <div class="steps">
+      <div class="step"><span class="no">P0</span><div><h3>Foundation &amp; data generator</h3><p>Repo scaffold, Docker Compose (Postgres + Kafka + Connect + MinIO), and the Faker generator that seeds 5M+ coherent rows into Postgres.</p><span class="out">→ deliverable: <code>docker compose up</code> yields a populated OLTP DB</span></div></div>
+      <div class="step"><span class="no">P1</span><div><h3>Batch ingestion</h3><p>PySpark JDBC job lands full + incremental snapshots to object storage as partitioned Parquet/Delta.</p><span class="out">→ deliverable: bronze tables from batch</span></div></div>
+      <div class="step"><span class="no">P2</span><div><h3>CDC streaming</h3><p>Register the Debezium Postgres connector; Spark Structured Streaming consumes Kafka and MERGEs into bronze Delta.</p><span class="out">→ deliverable: near-real-time bronze</span></div></div>
+      <div class="step"><span class="no">P3</span><div><h3>dbt transforms</h3><p>Silver conforming models + the gold star schema with SCD-2 dims, dbt tests, and docs.</p><span class="out">→ deliverable: queryable star schema</span></div></div>
+      <div class="step"><span class="no">P4</span><div><h3>Analytics homepage</h3><p>Streamlit app on the SQL warehouse: revenue trend, top categories, cohort retention, live order feed.</p><span class="out">→ deliverable: the shareable dashboard</span></div></div>
+      <div class="step"><span class="no">P5</span><div><h3>CI/CD &amp; orchestration</h3><p>GitHub Actions gates + Databricks Asset Bundle deploy + scheduled Workflows. Optional Terraform for cloud objects.</p><span class="out">→ deliverable: push-to-deploy platform</span></div></div>
+    </div>
+  </section>
+
+  <footer>
+    NovaMart Lakehouse · portfolio design doc · Databricks Free + Spark + Debezium + dbt · $0 infra
+  </footer>
+</div>

@@ -1,0 +1,21 @@
+# Copy to ~/.dbt/profiles.yml (or set DBT_PROFILES_DIR) and fill from your workspace.
+novamart:
+  target: dev
+  outputs:
+    dev:
+      type: databricks
+      catalog: novamart              # Unity Catalog
+      schema: gold
+      host: "{{ env_var('DATABRICKS_HOST') | replace('https://','') }}"
+      http_path: "{{ env_var('DATABRICKS_HTTP_PATH') }}"
+      token: "{{ env_var('DATABRICKS_TOKEN') }}"
+      threads: 4
+
+    ci:
+      type: databricks
+      catalog: novamart_ci
+      schema: gold
+      host: "{{ env_var('DATABRICKS_HOST') | replace('https://','') }}"
+      http_path: "{{ env_var('DATABRICKS_HTTP_PATH') }}"
+      token: "{{ env_var('DATABRICKS_TOKEN') }}"
+      threads: 4

@@ -1,0 +1,19 @@
+# Copy to terraform.tfvars and fill in. terraform.tfvars is gitignored.
+
+# ---- Databricks (workspace-level) ----
+# Leave host/token empty to read DATABRICKS_HOST / DATABRICKS_TOKEN from env.
+databricks_host       = ""
+databricks_token      = ""
+databricks_account_id = "00000000-0000-0000-0000-000000000000"
+
+catalog_name    = "novamart"
+admin_principal = "you@example.com" # your Databricks user, or a group name
+
+# ---- Free Edition: keep external storage OFF (managed catalog only) ----
+enable_external_storage = false
+
+# ---- Paid / full workspace: turn on S3-backed external storage ----
+# enable_external_storage = true
+# aws_region       = "us-east-1"
+# aws_account_id   = "123456789012"
+# lake_bucket_name = "novamart-lake-yourname"

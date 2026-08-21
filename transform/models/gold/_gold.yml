@@ -1,0 +1,91 @@
+version: 2
+
+models:
+  - name: dim_date
+    description: Conformed calendar dimension (day grain), 2021–2026.
+    columns:
+      - name: date_key
+        description: Integer surrogate key (yyyyMMdd).
+        data_tests: [unique, not_null]
+      - name: date
+        data_tests: [not_null]
+
+  - name: dim_customer
+    description: SCD-2 customer dimension — one row per historical version.
+    columns:
+      - name: customer_key
+        data_tests: [unique, not_null]
+      - name: customer_id
+        data_tests: [not_null]
+      - name: segment
+        data_tests:
+          - accepted_values:
+              values: ["consumer", "small_business", "corporate"]
+
+  - name: dim_product
+    description: SCD-2 product dimension with price banding.
+    columns:
+      - name: product_key
+        data_tests: [unique, not_null]
+      - name: price_band
+        data_tests:
+          - accepted_values:
+              values: ["budget", "mid", "premium", "luxury"]
+
+  - name: dim_seller
+    columns:
+      - name: seller_key
+        data_tests: [unique, not_null]
+
+  - name: dim_geography
+    columns:
+      - name: geography_key
+        data_tests: [unique, not_null]
+
+  - name: dim_payment_method
+    columns:
+      - name: payment_method_key
+        data_tests: [unique, not_null]
+      - name: payment_method
+        data_tests:
+          - accepted_values:
+              values: ["credit_card", "debit_card", "pix", "boleto", "wallet"]
+
+  - name: dim_order_status
+    columns:
+      - name: order_status_key
+        data_tests: [unique, not_null]
+
+  - name: fct_order_items
+    description: "Fact at order-line grain. Additive measures: net_amount, margin_amount."
+    columns:
+      - name: order_item_id
+        data_tests: [unique, not_null]
+      - name: net_amount
+        data_tests: [not_null]
+      - name: customer_key
+        data_tests:
+          - relationships:
+              to: ref('dim_customer')
+              field: customer_key
+      - name: product_key
+        data_tests:
+          - relationships:
+              to: ref('dim_product')
+              field: product_key
+      - name: date_key
+        data_tests:
+          - relationships:
+              to: ref('dim_date')
+              field: date_key
+
+  - name: fct_payments
+    description: Fact at payment grain, sharing conformed dimensions.
+    columns:
+      - name: payment_id
+        data_tests: [unique, not_null]
+      - name: payment_amount
+        data_tests: [not_null]
+
+  - name: mart_daily_sales
+    description: Pre-aggregated daily sales by category and region for the dashboard.

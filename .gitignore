@@ -1,0 +1,45 @@
+# Python
+__pycache__/
+*.py[cod]
+.venv/
+venv/
+*.egg-info/
+.pytest_cache/
+.ruff_cache/
+.mypy_cache/
+
+# dbt
+transform/target/
+transform/dbt_packages/
+transform/logs/
+profiles.yml
+
+# data / secrets
+data/
+*.parquet
+*.csv.gz
+.env
+*.local
+
+# spark / java
+spark-warehouse/
+metastore_db/
+derby.log
+
+# databricks
+.databricks/
+
+# OS / editor
+.DS_Store
+.idea/
+.vscode/
+_parse.duckdb
+transform/.user.yml
+
+# terraform
+**/.terraform/*
+*.tfstate
+*.tfstate.*
+terraform.tfvars
+crash.log
+*.tfplan

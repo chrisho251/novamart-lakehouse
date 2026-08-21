@@ -1,0 +1,48 @@
+[project]
+name = "novamart-lakehouse"
+version = "0.1.0"
+description = "End-to-end e-commerce data platform: batch + CDC → Databricks lakehouse → dbt star schema"
+requires-python = ">=3.10"
+dependencies = [
+    "Faker>=25.0",
+]
+
+[project.optional-dependencies]
+# Loading generated data into Postgres
+postgres = ["psycopg[binary]>=3.1"]
+# Spark ingestion jobs (batch + streaming). On Databricks these are provided.
+spark = ["pyspark>=3.5"]
+# Analytics homepage
+app = ["streamlit>=1.36", "databricks-sql-connector>=3.0", "plotly>=5.20", "pandas>=2.0"]
+# Transform layer
+dbt = ["dbt-databricks>=1.8"]
+# Dev tooling
+dev = [
+    "pytest>=8.0",
+    "ruff>=0.5",
+    "black>=24.0",
+]
+
+[project.scripts]
+novamart-gen = "novamart_gen.generate:main"
+
+[build-system]
+requires = ["setuptools>=68"]
+build-backend = "setuptools.build_meta"
+
+[tool.setuptools.packages.find]
+where = ["ingestion/generator"]
+
+[tool.ruff]
+line-length = 100
+target-version = "py310"
+
+[tool.ruff.lint]
+select = ["E", "F", "I", "UP", "B"]
+
+[tool.black]
+line-length = 100
+
+[tool.pytest.ini_options]
+pythonpath = ["ingestion/generator", "app"]
+testpaths = ["tests"]

@@ -1,0 +1,77 @@
+# Databricks Asset Bundle — declares the workspace, jobs and workflows as code.
+#   databricks bundle validate --target prod
+#   databricks bundle deploy   --target prod
+bundle:
+  name: novamart-lakehouse
+
+variables:
+  catalog:
+    description: Unity Catalog to build into
+    default: novamart
+  warehouse_id:
+    description: SQL warehouse id serving the gold layer
+    default: ""
+
+targets:
+  dev:
+    mode: development
+    default: true
+    workspace:
+      host: ${DATABRICKS_HOST}
+  prod:
+    mode: production
+    workspace:
+      host: ${DATABRICKS_HOST}
+      root_path: /Workspace/Shared/novamart/prod
+
+resources:
+  jobs:
+    novamart_batch_ingest:
+      name: "[novamart] batch ingest -> bronze"
+      schedule:
+        quartz_cron_expression: "0 0 2 * * ?"   # daily 02:00
+        timezone_id: "UTC"
+      tasks:
+        - task_key: batch_full_dims
+          notebook_task:
+            notebook_path: ../../ingestion/batch/batch_ingest.py
+            base_parameters:
+              mode: full
+              tables: customers,sellers,products
+        - task_key: batch_incremental_facts
+          depends_on: [{ task_key: batch_full_dims }]
+          notebook_task:
+            notebook_path: ../../ingestion/batch/batch_ingest.py
+            base_parameters:
+              mode: incremental
+              tables: orders,order_items,payments
+
+    novamart_transform:
+      name: "[novamart] dbt build (silver + gold)"
+      schedule:
+        quartz_cron_expression: "0 30 2 * * ?"   # after ingest
+        timezone_id: "UTC"
+      tasks:
+        - task_key: dbt_snapshot
+          dbt_task:
+            project_directory: ../../transform
+            commands: ["dbt deps", "dbt snapshot"]
+            warehouse_id: ${var.warehouse_id}
+        - task_key: dbt_build
+          depends_on: [{ task_key: dbt_snapshot }]
+          dbt_task:
+            project_directory: ../../transform
+            commands: ["dbt build"]
+            warehouse_id: ${var.warehouse_id}
+
+    novamart_freshness:
+      name: "[novamart] nightly source freshness"
+      schedule:
+        quartz_cron_expression: "0 0 6 * * ?"
+        timezone_id: "UTC"
+      tasks:
+        - task_key: freshness
+          dbt_task:
+            project_directory: ../../transform
+            commands: ["dbt source freshness"]
+            warehouse_id: ${var.warehouse_id}

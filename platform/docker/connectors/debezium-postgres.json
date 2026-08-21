@@ -1,0 +1,33 @@
+{
+  "name": "novamart-postgres-cdc",
+  "config": {
+    "connector.class": "io.debezium.connector.postgresql.PostgresConnector",
+    "tasks.max": "1",
+
+    "database.hostname": "postgres",
+    "database.port": "5432",
+    "database.user": "nova",
+    "database.password": "nova",
+    "database.dbname": "novamart",
+
+    "topic.prefix": "nova",
+    "plugin.name": "pgoutput",
+    "publication.name": "novamart_pub",
+    "slot.name": "novamart_slot",
+
+    "table.include.list": "public.customers,public.sellers,public.products,public.orders,public.order_items,public.payments",
+
+    "snapshot.mode": "initial",
+    "decimal.handling.mode": "double",
+    "time.precision.mode": "connect",
+    "tombstones.on.delete": "true",
+
+    "heartbeat.interval.ms": "10000",
+    "producer.override.compression.type": "lz4",
+
+    "key.converter": "org.apache.kafka.connect.json.JsonConverter",
+    "key.converter.schemas.enable": "false",
+    "value.converter": "org.apache.kafka.connect.json.JsonConverter",
+    "value.converter.schemas.enable": "false"
+  }
+}
