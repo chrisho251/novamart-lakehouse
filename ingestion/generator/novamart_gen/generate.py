@@ -135,7 +135,22 @@ class PostgresSink:
         buf = self._buffers[table]
         buf.append(tuple(row.get(c) for c in TABLES[table]))
         if len(buf) >= self.batch:
-            self._flush(table)
+            self._flush_through(table)
+
+    def _flush_through(self, table: str):
+        """Flush ``table`` and every table that precedes it in ``TABLES``.
+
+        ``TABLES`` is declared in parent-before-child order (customers/sellers/
+        products -> orders -> order_items/payments). Buffers are per-table and
+        independently sized, so a child table can fill up (and need a flush)
+        while its parent's buffer is still short of the threshold. Flushing
+        blindly would COPY child rows whose foreign keys aren't committed yet.
+        Flushing every earlier table first guarantees referenced rows exist.
+        """
+        for t in TABLES:
+            self._flush(t)
+            if t == table:
+                break
 
     def _flush(self, table: str):
         buf = self._buffers[table]
